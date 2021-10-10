@@ -30,37 +30,10 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-/*
-  void getMessages() async {
-    try {
-      final messages = await _firestore.collection('messages').get();
-      for (var message in messages.docs) {
-        print(message.data());
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-*/
-
-  void messagesStream() async {
-    try {
-      await for (var snapshot
-          in _firestore.collection('messages').snapshots()) {
-        for (var message in snapshot.docs) {
-          print(message.data());
-        }
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
     getCurrentUser();
-    messagesStream();
   }
 
   @override
@@ -94,9 +67,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: TextField(
                       controller: _messageTextController,
                       onChanged: (value) {
-                        setState(() {
-                          _messageText = value;
-                        });
+                        _messageText = value;
                       },
                       decoration: kMessageTextFieldDecoration,
                     ),
@@ -110,6 +81,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         await _firestore.collection("messages").add({
                           'sender': _loggedInUser.email,
                           'text': _messageText,
+                          'timestamp': FieldValue.serverTimestamp(),
                         });
                       } catch (e) {
                         print(e);
